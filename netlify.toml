@@ -1,0 +1,23 @@
+[build]
+  command = "cd startuphunt && npm ci && npm run build"
+  publish = "startuphunt/.next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# WWW Canonicalization (keep these two)
+[[redirects]]
+  from = "https://www.launchitsite.netlify.app/*"
+  to = "https://launchitsite.netlify.app/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.launchit.site/*"
+  to = "https://launchit.site/:splat"
+  status = 301
+  force = true
+
+[build.environment]
+  NODE_VERSION = "20"
+  SECRETS_SCAN_ENABLED = "false"

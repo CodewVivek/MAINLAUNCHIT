@@ -1,0 +1,46 @@
+# First blog post – copy into Admin → Blog
+
+Use these fields in Admin → Blog → New Post. Set status to "published" when ready.
+
+---
+TITLE:
+Welcome to the Launchit Blog
+
+---
+SLUG:
+welcome-to-launchit
+
+---
+EXCERPT:
+We're launching our blog to share guides, launch stories, and tips for founders who want to ship products and get visibility—without gatekeeping.
+
+---
+CATEGORY:
+Guide
+
+---
+COVER IMAGE (optional):
+Leave empty, or use a URL like https://launchit.site/images/r6_circle_optimized.png
+
+---
+CONTENT (paste below into the Content field):
+
+We're excited to welcome you to the Launchit blog.
+
+Launchit is where builders launch projects. Whether you're a solo founder, a small team, or an indie hacker, our goal is simple: give every product a place to be seen and discovered—without paywalls or approval committees. You ship, we help you get in front of makers who care.
+
+What you'll find here
+
+In this blog we'll share practical guides and stories: how to launch effectively, how to get early traction, how to use Launchit's features (from badges and upvotes to Showcase and Spotlight), and lessons from the community. We'll also highlight launches we're proud of and tips that actually work.
+
+Why we built Launchit
+
+We got tired of launch platforms that charge before you have traction, or hide your project behind a feed that only rewards the already popular. We wanted a place where a great idea and a clear pitch can stand out. So we built Launchit: homepage visibility, category discovery, upvotes, and optional paid plans for teams who want extra reach and SEO—all in one place.
+
+What's next
+
+More guides, more case studies, and more product updates. If you have a topic you'd like us to cover, reach out on X (@launchit__ or @vweekk_) or on Peerlist.
+
+Until then: ship something, add it to Launchit, and tell your story. We're here for it.
+
+— The Launchit team

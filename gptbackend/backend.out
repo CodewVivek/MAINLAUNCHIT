@@ -1,0 +1,4 @@
+[dotenv@17.2.1] injecting env (11) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+Environment variables verified.
+AI Backend is listening on port 3001

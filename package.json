@@ -1,0 +1,15 @@
+{
+  "name": "launchit",
+  "version": "1.0.0",
+  "description": "Launchit - Startup Discovery Platform",
+  "scripts": {
+    "build": "cd startuphunt && npm install && npm run build",
+    "dev": "cd startuphunt && npm run dev",
+    "preview": "cd startuphunt && npm run preview"
+  },
+  "dependencies": {
+    "fast-average-color": "^9.5.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
+  }
+}
