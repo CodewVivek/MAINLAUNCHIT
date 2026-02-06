@@ -32,7 +32,7 @@ const nextConfig = {
   },
   // Enable static exports for SSG
   // output: 'export', // Uncomment when ready to deploy as static site
-  outputFileTracingRoot: '/Users/vivek/Desktop/strtuphunt/startuphunt',
+  // outputFileTracingRoot removed: absolute path breaks on Vercel
 };
 
 export default nextConfig;

@@ -3,6 +3,8 @@ import { GeistMono } from 'geist/font/mono';
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import LayoutWrapper from "@/components/LayoutWrapper";
+
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 export const metadata = {
@@ -62,6 +64,7 @@ export default function RootLayout({ children }) {
             {children}
           </LayoutWrapper>
           <Toaster position="bottom-right" toastOptions={{ duration: 4000 }} />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
