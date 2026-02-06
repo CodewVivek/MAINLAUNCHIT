@@ -9,13 +9,15 @@ import { createClient } from '@supabase/supabase-js'
  * Use this in server components and server actions
  */
 export async function createServerSupabaseClient() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    if (!url || !key) {
+        throw new Error('Missing Supabase env: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.')
+    }
     // Next.js 16 cookies() is async in App Router.
-    // If you don't await it, cookieStore is a Promise -> cookieStore.get is not a function.
     const cookieStore = await cookies()
 
-    return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    return createServerClient(url, key,
         {
             cookies: {
                 get(name) {
@@ -79,15 +81,16 @@ export async function createRouteHandlerClient() {
  * Use this in generateStaticParams, sitemap, etc. where `cookies()` is not available.
  */
 export function createPublicSupabaseClient() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        {
-            auth: {
-                autoRefreshToken: false,
-                persistSession: false,
-                detectSessionInUrl: false,
-            },
-        }
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    if (!url || !key) {
+        throw new Error('Missing Supabase env: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.')
+    }
+    return createClient(url, key, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false,
+        },
+    })
 }

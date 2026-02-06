@@ -1,4 +1,4 @@
-import { supabase } from "@/supabaseClient";
+import { createPublicSupabaseClient } from "@/lib/supabase-server";
 import CategoryProjectsClient from "@/components/pages/CategoryProjectsClient";
 import { CATEGORIES } from "@/constants/categories";
 
@@ -51,9 +51,10 @@ export async function generateMetadata(props) {
 export default async function CategoryPage(props) {
     const params = await props.params;
     const category = decodeURIComponent(params.category);
+    const supabase = createPublicSupabaseClient();
 
     // Match category case-insensitively (DB may have "Productivity" or "productivity")
-    const { data: projects, error } = await supabase
+    const { data: projectsData, error } = await supabase
         .from('projects')
         .select(`
       id,
@@ -75,9 +76,7 @@ export default async function CategoryPage(props) {
         .order('created_at', { ascending: false })
         .limit(200);
 
-    if (error) {
-        projects = null;
-    }
+    const projects = error ? null : projectsData;
 
     // Fetch profile names for project owners (no FK join assumptions)
     let normalized = projects || [];

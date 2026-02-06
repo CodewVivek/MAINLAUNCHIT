@@ -202,7 +202,11 @@ export default function PricingPage() {
                 'Homepage listing (standard rotation)',
                 'Dedicated project page for visitors',
                 'Community upvotes & organic discovery',
-                '1 SEO do-follow backlink (add badge + reach 10 upvotes)',
+                {
+                    type: 'dofollow',
+                    title: 'Dofollow Backlink only if:',
+                    conditions: ['Add Launchit badge to your site', '10+ upvotes within 2 days'],
+                },
                 'Category listing with standard placement',
             ],
             cta: 'Get Started Free',
@@ -475,16 +479,38 @@ export default function PricingPage() {
 
                             {/* Features list */}
                             <div className="p-6 space-y-3 flex-1">
-                                {plan.features.map((f, i) => (
-                                    <div key={i} className="flex items-start gap-2.5 group/feat">
-                                        <div className="mt-0.5 p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover/feat:text-blue-500 transition-colors">
-                                            {f.includes('Everything') ? <Plus className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                                {plan.features.map((f, i) => {
+                                    if (typeof f === 'object' && f?.type === 'dofollow') {
+                                        return (
+                                            <div key={i} className="flex items-start gap-2.5 group/feat">
+                                                <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-slate-700 dark:bg-slate-600 flex items-center justify-center text-white">
+                                                    <Check className="w-3 h-3" strokeWidth={2.5} />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                                                        {f.title}
+                                                    </p>
+                                                    <ol className="mt-1.5 ml-0 space-y-0.5 list-decimal list-inside text-xs font-medium text-slate-500 dark:text-slate-400">
+                                                        {f.conditions.map((c, j) => (
+                                                            <li key={j}>{c}</li>
+                                                        ))}
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    const text = typeof f === 'string' ? f : '';
+                                    return (
+                                        <div key={i} className="flex items-start gap-2.5 group/feat">
+                                            <div className="mt-0.5 p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover/feat:text-blue-500 transition-colors">
+                                                {text.includes('Everything') ? <Plus className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                                            </div>
+                                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 leading-snug group-hover/feat:text-slate-900 dark:group-hover/feat:text-white transition-colors">
+                                                {text}
+                                            </span>
                                         </div>
-                                        <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 leading-snug group-hover/feat:text-slate-900 dark:group-hover/feat:text-white transition-colors">
-                                            {f}
-                                        </span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             {/* Subscription Info */}
