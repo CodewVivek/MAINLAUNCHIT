@@ -1,6 +1,9 @@
 import { supabase } from "@/supabaseClient";
 import DashBoardClient from "@/components/pages/DashBoardClient";
 
+// Always fetch fresh launches (no static cache) so "today" stays current
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Launchit - Where Builders Launch Projects",
   description: "Discover and launch early-stage startups on Launchit - ship products faster, get visibility, and reach makers without gatekeeping.",

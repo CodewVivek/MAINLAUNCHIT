@@ -8,15 +8,22 @@ const ThemeContext = createContext({
 });
 
 export const ThemeProvider = ({ children, defaultTheme = "light", storageKey = "vite-ui-theme" }) => {
-    const [theme, setTheme] = useState(() => {
-        // Only access localStorage on client-side
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem(storageKey) || defaultTheme;
-        }
-        return defaultTheme;
-    });
+    // Always use defaultTheme for initial state so server and client match (avoids React #418 hydration)
+    const [theme, setTheme] = useState(defaultTheme);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) return;
+        const stored = localStorage.getItem(storageKey) || defaultTheme;
+        setTheme(stored);
+    }, [mounted, storageKey, defaultTheme]);
+
+    useEffect(() => {
+        if (!mounted) return;
         const root = window.document.documentElement;
 
         root.classList.remove("light", "dark");
@@ -32,7 +39,7 @@ export const ThemeProvider = ({ children, defaultTheme = "light", storageKey = "
         }
 
         root.classList.add(theme);
-    }, [theme]);
+    }, [mounted, theme]);
 
     const value = {
         theme,

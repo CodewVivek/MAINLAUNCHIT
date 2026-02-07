@@ -225,6 +225,30 @@ export default function SubmitPage() {
         }
     }, [currentStep, profile]);
 
+    // Profile complete + modal state: auto-close when profile becomes complete (must run before any early return)
+    const profileComplete = profile == null ? true : checkProfileCompletion(profile).isComplete;
+    useEffect(() => {
+        if (profileComplete && isProfileModalOpen) {
+            setIsProfileModalOpen(false);
+        }
+    }, [profileComplete, isProfileModalOpen]);
+
+    // Refetch profile on tab focus when on Step 0 (must run before any early return)
+    useEffect(() => {
+        const onVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && user && currentStep === 0) {
+                supabase
+                    .from('profiles')
+                    .select('id, full_name, username, avatar_url, role, location, twitter, linkedin, portfolio, youtube')
+                    .eq('id', user.id)
+                    .maybeSingle()
+                    .then(({ data }) => { if (data) setProfile(data); });
+            }
+        };
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+    }, [user, currentStep]);
+
     const handleStep0Continue = async (data) => {
         // Step 0 only: block if profile still incomplete (e.g. user closed modal)
         if (profile) {
@@ -437,31 +461,6 @@ export default function SubmitPage() {
             </div>
         );
     }
-
-    const profileComplete = profile == null ? true : checkProfileCompletion(profile).isComplete;
-
-    // Auto-close profile modal when profile becomes complete (e.g. after saving in Settings or late load)
-    useEffect(() => {
-        if (profileComplete && isProfileModalOpen) {
-            setIsProfileModalOpen(false);
-        }
-    }, [profileComplete, isProfileModalOpen]);
-
-    // Refetch profile when user returns to this tab (e.g. after saving in Settings in another tab)
-    useEffect(() => {
-        const onVisibilityChange = () => {
-            if (document.visibilityState === 'visible' && user && currentStep === 0) {
-                supabase
-                    .from('profiles')
-                    .select('id, full_name, username, avatar_url, role, location, twitter, linkedin, portfolio, youtube')
-                    .eq('id', user.id)
-                    .maybeSingle()
-                    .then(({ data }) => { if (data) setProfile(data); });
-            }
-        };
-        document.addEventListener('visibilitychange', onVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-    }, [user, currentStep]);
 
     if (currentStep === 0) {
         return (
