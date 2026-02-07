@@ -1,7 +1,12 @@
 // AI API utility functions
 
-// Use config to get backend URL (respects VITE_API_URL env var for branch-specific URLs)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+// Use config to get backend URL. Must be absolute (with protocol) or fetch treats it as a relative path.
+function getApiBaseUrl() {
+  let url = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001').trim().replace(/\/$/, '');
+  if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
+  return url;
+}
+const API_BASE_URL = getApiBaseUrl();
 
 // Semantic Search API
 export const semanticSearch = async (query, limit = 10, filters = {}) => {

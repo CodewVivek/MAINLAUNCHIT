@@ -75,7 +75,12 @@ export const generateLaunchData = async ({
         }
 
         // Fetch the website and get the html. Never use localhost in production (triggers browser "local network" prompt).
-        const backendUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
+        let backendUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/$/, '');
+        // Critical: URL must be absolute (include protocol). Otherwise fetch() treats it as a relative path
+        // and requests go to current origin, e.g. vercel.app/mainlaunchit-production.up.railway.app/... → 405
+        if (backendUrl && !/^https?:\/\//i.test(backendUrl)) {
+            backendUrl = `https://${backendUrl}`;
+        }
         const isProd = typeof window !== 'undefined' && !/localhost|127\.0\.0\.1/.test(window.location?.hostname || '');
         const useLocalhost = !backendUrl || /localhost|127\.0\.0\.1/.test(backendUrl);
         if (isProd && useLocalhost) {
