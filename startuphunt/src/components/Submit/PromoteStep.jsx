@@ -45,18 +45,29 @@ export default function PromoteStep({
 
         setVerifying(true);
         try {
-            const response = await fetch('http://localhost:5001/api/verify-badge', {
+            const response = await fetch('/api/verify-badge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: formData.websiteUrl })
             });
+
             const data = await response.json();
 
             if (data.success) {
                 setIsBadgeVerified(true);
-                toast.success("Verification Successful! Your project is ready to launch.");
+                toast.success(data.message || "Badge verified! Your project is ready to launch.");
             } else {
-                toast.error(data.message || "Badge not detected. Please make sure it's visible on your site.");
+                toast.error(data.message || "Badge verification failed. Please check and try again.", {
+                    duration: 6000
+                });
+                if (data.hint) {
+                    setTimeout(() => {
+                        toast(data.hint, {
+                            icon: '💡',
+                            duration: 5000
+                        });
+                    }, 500);
+                }
             }
         } catch (error) {
             toast.error("Verification failed. Please check your connection and try again.");

@@ -70,28 +70,8 @@ export const handleFormSubmission = async ({
     // Only generate new slug for new projects, not when editing
     if (!isEditing) {
         try {
-            // ANTI-SPAM: Check Daily Launch Limit (1 per 24h)
-            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-            const { count, error: limitError } = await supabase
-                .from('projects')
-                .select('id', { count: 'exact', head: true })
-                .eq('user_id', user.id)
-                .eq('status', 'launched')
-                .gte('created_at', twentyFourHoursAgo);
-
-            if (limitError) {
-                // fail open on limit check error
-            } else if (count >= 1) {
-                toast.error("🚀 You've reached your daily launch limit (1/1). Please wait 24h or save as draft!", {
-                    duration: 6000,
-                    icon: '🛑'
-                });
-                throw new Error('launch_limit_reached');
-            }
-
             submissionData.slug = await generateUniqueSlug(formData.name, supabase);
         } catch (error) {
-            if (error.message === 'launch_limit_reached') throw error;
             // Fallback for slug generation
             const baseSlug = slugify(formData.name);
             submissionData.slug = `${baseSlug}-${Date.now()}`;

@@ -31,9 +31,6 @@ export default function SubmitPage() {
     const [profile, setProfile] = useState(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [editingProjectId, setEditingProjectId] = useState(null);
-    const [launchCountTotal, setLaunchCountTotal] = useState(0);
-    const [recentLaunches, setRecentLaunches] = useState([]);
-    const [timeLeft, setTimeLeft] = useState('');
 
     const [formData, setFormData] = useState({
         name: '',
@@ -91,19 +88,6 @@ export default function SubmitPage() {
             setUserDrafts(drafts || []);
             setIsDraftsLoading(false);
 
-            // ANTI-SPAM: Fetch Daily Launch Count (24h)
-            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-            const { data: currentLaunchesData, count: currentLaunchesCount } = await supabase
-                .from('projects')
-                .select('id, name, created_at', { count: 'exact' })
-                .eq('user_id', user.id)
-                .eq('status', 'launched')
-                .gte('created_at', twentyFourHoursAgo)
-                .order('created_at', { ascending: false });
-
-            setLaunchCountTotal(currentLaunchesCount || 0);
-            setRecentLaunches(currentLaunchesData || []);
-
             // Check for edit query param
             const editId = searchParams.get('edit');
             if (editId) {
@@ -152,32 +136,7 @@ export default function SubmitPage() {
         initializePage();
     }, [router, searchParams]);
 
-    useEffect(() => {
-        if (launchCountTotal <= 0 || !recentLaunches[0]) {
-            setTimeLeft('');
-            return;
-        }
 
-        const calculateTime = () => {
-            const lastLaunch = new Date(recentLaunches[0].created_at);
-            const resetTime = new Date(lastLaunch.getTime() + 24 * 60 * 60 * 1000);
-            const now = new Date();
-            const diff = resetTime - now;
-
-            if (diff <= 0) {
-                setTimeLeft('');
-                return;
-            }
-
-            const h = Math.floor(diff / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            setTimeLeft(`${h}h ${m}m`);
-        };
-
-        calculateTime();
-        const interval = setInterval(calculateTime, 60000);
-        return () => clearInterval(interval);
-    }, [launchCountTotal, recentLaunches]);
 
     const applyAIDataToForm = (data, prev) => {
         return {
@@ -504,8 +463,6 @@ export default function SubmitPage() {
             {/* Left Sidebar: Navigation */}
             <SubmitSidebar
                 currentStep={currentStep}
-                launchCount={launchCountTotal}
-                recentLaunches={recentLaunches}
                 isEditing={!!editingProjectId}
                 onStepClick={(step) => {
                     if (currentStep > 0 && step > 0) setCurrentStep(step);
@@ -521,8 +478,6 @@ export default function SubmitPage() {
                             onChange={handleFormChange}
                             onAIGenerate={handleAIGenerate}
                             handleNext={handleNext}
-                            launchCount={launchCountTotal}
-                            recentLaunches={recentLaunches}
                             isEditing={!!editingProjectId}
                             handleSaveDraft={() => handleSaveDraft({
                                 user, formData, supabase,
@@ -614,21 +569,9 @@ export default function SubmitPage() {
                         </div>
 
                         <div className="flex items-center gap-4 w-full sm:w-auto order-1 sm:order-2">
-                            {currentStep === 3 && launchCountTotal >= 1 && !editingProjectId && (
-                                <div className="flex flex-col items-end gap-1.5">
-                                    <div className="text-[11px] font-bold text-red-500 bg-red-500/5 px-3 py-1.5 rounded-lg border border-red-500/20 animate-pulse">
-                                        Limit Reached (1/1 Today)
-                                    </div>
-                                    {timeLeft && (
-                                        <div className="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase tracking-tight">
-                                            <Clock className="w-3 h-3" /> Next Slot: {timeLeft}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
                             <button
                                 onClick={handleNext}
-                                disabled={!isStepValid() || (currentStep === 3 && launchCountTotal >= 1 && !editingProjectId)}
+                                disabled={!isStepValid()}
                                 className="w-full sm:w-auto px-10 h-11 rounded-xl bg-blue-600 text-white font-black text-sm tracking-tight hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {currentStep === 3 ? (selectedPlan === 'standard' ? 'Launch Project' : 'Promote & Launch') : 'Continue'}

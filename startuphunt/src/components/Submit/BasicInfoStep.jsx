@@ -5,35 +5,7 @@ import { Sparkles, Rocket, ArrowRight, X, Plus, Clock } from 'lucide-react';
 import CategorySearch from './CategorySearch';
 import BuiltWithSelect from './BuiltWithSelect';
 
-export default function BasicInfoStep({ formData, onChange, onAIGenerate, handleNext, handleSaveDraft, isStepValid, launchCount = 0, isEditing = false, recentLaunches = [] }) {
-    const [timeLeft, setTimeLeft] = useState('');
-
-    useEffect(() => {
-        if (launchCount <= 0 || !recentLaunches[0]) {
-            setTimeLeft('');
-            return;
-        }
-
-        const calculateTime = () => {
-            const lastLaunch = new Date(recentLaunches[0].created_at);
-            const resetTime = new Date(lastLaunch.getTime() + 24 * 60 * 60 * 1000);
-            const now = new Date();
-            const diff = resetTime - now;
-
-            if (diff <= 0) {
-                setTimeLeft('');
-                return;
-            }
-
-            const h = Math.floor(diff / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            setTimeLeft(`${h}h ${m}m`);
-        };
-
-        calculateTime();
-        const interval = setInterval(calculateTime, 60000); // UI countdown
-        return () => clearInterval(interval);
-    }, [launchCount, recentLaunches]);
+export default function BasicInfoStep({ formData, onChange, onAIGenerate, handleNext, handleSaveDraft, isStepValid, isEditing = false }) {
     const [taglineCount, setTaglineCount] = useState(formData.tagline?.length || 0);
     const [descriptionCount, setDescriptionCount] = useState(formData.description?.split(' ').length || 0);
     const [newTag, setNewTag] = useState('');
@@ -78,28 +50,6 @@ export default function BasicInfoStep({ formData, onChange, onAIGenerate, handle
                     We'll need its name, URL, tagline, and description to get started.
                 </p>
             </div>
-
-            {/* Launch Limit Warning - Only for NEW projects */}
-            {launchCount >= 1 && !isEditing && (
-                <div className="mb-8 p-4 bg-red-500/5 border border-red-500/20 rounded-2xl flex items-start gap-4 animate-in slide-in-from-top-2 duration-500">
-                    <div className="p-2.5 bg-red-500/10 rounded-xl">
-                        <Rocket className="w-5 h-5 text-red-500" />
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-bold text-red-500 mb-1">Daily Launch Limit Reached (1/1)</h4>
-                        <p className="text-[12px] text-red-500/70 leading-relaxed font-medium mb-3">
-                            You've launched a project in the last 24 hours. You can still prepare and <span className="text-red-500 font-bold">save as a draft</span> for now, and launch it once your daily slots reset! 🚀
-                        </p>
-
-                        {timeLeft && (
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-500/10 rounded-xl border border-red-500/20">
-                                <Clock className="w-3.5 h-3.5 text-red-500" />
-                                <span className="text-[11px] font-black text-red-500 uppercase tracking-tight">Next Slot in: {timeLeft}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
 
             <div className="space-y-6">
                 {/* Product Name & Website URL Row */}
