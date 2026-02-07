@@ -993,5 +993,5 @@ const ProjectDetailsClient = ({ initialProject, initialCreator = null, upvotesWi
   );
 };
 
-export default ProjectDetails;
+export default ProjectDetailsClient;
 
