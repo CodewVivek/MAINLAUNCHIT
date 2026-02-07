@@ -19,6 +19,14 @@ if (missingEnvVars.length > 0) {
 }
 console.log("Environment variables verified.");
 
+const CORS_ORIGINS = [
+  'https://launchit.site',
+  'https://launchitsite.netlify.app',
+  'https://mainlaunchit.vercel.app',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+];
+
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 
@@ -29,13 +37,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-  origin: [
-    'https://launchit.site',
-    'https://launchitsite.netlify.app',
-    'https://mainlaunchit.vercel.app',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
+  origin: CORS_ORIGINS,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -185,6 +187,18 @@ async function generateScreenshotInBackground(url) {
     return null;
   }
 }
+
+// Explicit OPTIONS for CORS preflight (avoids 405 from proxies/Railway when browser sends OPTIONS before POST)
+app.options("/generatelaunchdata", (req, res) => {
+  const origin = req.headers.origin;
+  if (origin && CORS_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.sendStatus(204);
+});
 
 app.post("/generatelaunchdata", rateLimitMiddleware, async (req, res) => {
   const { url } = req.body;
