@@ -84,10 +84,26 @@ export default async function ProjectPage(props) {
         notFound();
     }
 
+    // Free-tier dofollow: "10+ upvotes within 2 days" — count likes that happened within 2 days of launch.
+    // Requires project_likes.created_at (add if missing: ALTER TABLE project_likes ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();)
+    let upvotesWithin2Days = null;
+    const launchDate = project.created_at ? new Date(project.created_at) : null;
+    if (launchDate) {
+        const twoDaysAfterLaunch = new Date(launchDate);
+        twoDaysAfterLaunch.setUTCDate(twoDaysAfterLaunch.getUTCDate() + 2);
+        const { count, error: likesError } = await supabase
+            .from('project_likes')
+            .select('*', { count: 'exact', head: true })
+            .eq('project_id', project.id)
+            .gte('created_at', launchDate.toISOString())
+            .lte('created_at', twoDaysAfterLaunch.toISOString());
+        if (!likesError) upvotesWithin2Days = count ?? null;
+    }
+
     // Pass server-fetched data to client component with Suspense boundary
     return (
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-            <ProjectDetailsClient initialProject={project} />
+            <ProjectDetailsClient initialProject={project} upvotesWithin2Days={upvotesWithin2Days} />
         </Suspense>
     );
 }

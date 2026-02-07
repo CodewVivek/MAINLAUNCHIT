@@ -632,16 +632,6 @@ const Settings = () => {
             const sanitizedBio = sanitizeText(formData.bio, 200);
             const sanitizedLocation = sanitizeText(formData.location, 100);
 
-            if (!sanitizedLocation) {
-                setSnackbar({
-                    open: true,
-                    message: "Location is required",
-                    severity: "error",
-                });
-                setSaving(false);
-                return;
-            }
-
             const updateData = {
                 full_name: sanitizedName,
                 bio: sanitizedBio,

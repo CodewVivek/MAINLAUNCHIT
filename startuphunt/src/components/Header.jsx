@@ -200,7 +200,7 @@ export default function Header({ onMenuClick }) {
                                         </button>
 
                                         <button onClick={() => { setOpenProfile(false); setOpenFeedback(true); }} className="menu-item">
-                                            <MessageCircle className="w-4 h-4 text-emerald-500" /> Feedback
+                                            <MessageCircle className="w-4 h-4" /> Feedback
                                         </button>
 
                                         <button onClick={logout} className="menu-item text-red-500">
@@ -213,7 +213,7 @@ export default function Header({ onMenuClick }) {
                                             <CircleUserRound /> Sign in
                                         </button>
                                         <button onClick={() => { setOpenProfile(false); setOpenFeedback(true); }} className="menu-item">
-                                            <MessageCircle className="w-4 h-4 text-emerald-500" /> Feedback
+                                            <MessageCircle className="w-4 h-4" /> Feedback
                                         </button>
                                     </>
                                 )}

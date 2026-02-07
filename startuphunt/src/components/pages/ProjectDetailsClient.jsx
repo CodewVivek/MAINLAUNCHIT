@@ -92,7 +92,7 @@ function getLinkLabel(url) {
   return "Website";
 }
 
-const ProjectDetails = ({ initialProject }) => {
+const ProjectDetails = ({ initialProject, upvotesWithin2Days = null }) => {
   const router = useRouter();
 
   const [project, setProject] = useState(initialProject);
@@ -128,9 +128,10 @@ const ProjectDetails = ({ initialProject }) => {
       year: "numeric",
     });
 
-  // Do-follow: Standard = 1 (detail page only when badge + 10 upvotes). Showcase = 5 on-site. Spotlight = 5 on-site + 2 from launch blog.
+  // Do-follow: Standard = 1 (detail page only when badge + 10 upvotes within 2 days). Showcase/Spotlight = on-site backlinks.
   const likesCount = project?.likes?.[0]?.count ?? 0;
-  const isDofollowEligible = project?.is_sponsored || (project?.badge_verified && likesCount >= 10);
+  const effectiveUpvotesForDofollow = upvotesWithin2Days != null ? upvotesWithin2Days : likesCount; // fallback when project_likes.created_at missing
+  const isDofollowEligible = project?.is_sponsored || (project?.badge_verified && effectiveUpvotesForDofollow >= 10);
   const websiteLinkRel = isDofollowEligible ? "noopener noreferrer" : "noopener nofollow";
 
 

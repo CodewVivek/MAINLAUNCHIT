@@ -32,10 +32,13 @@ app.use(cors({
   origin: [
     'https://launchit.site',
     'https://launchitsite.netlify.app',
+    'https://mainlaunchit.vercel.app',
     'http://localhost:3000',
     'http://127.0.0.1:3000'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Security headers
