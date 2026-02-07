@@ -255,9 +255,11 @@
     transform: scale(0.9);
   }
 
-  .ph-slider .slick-center {
-    opacity: 1;
-    transform: scale(1);
+  .ph-slider .slick-active,
+  .ph-slider .slick-center,
+  .ph-slider .slick-current {
+    opacity: 1 !important;
+    transform: scale(1) !important;
     z-index: 10;
   }
 

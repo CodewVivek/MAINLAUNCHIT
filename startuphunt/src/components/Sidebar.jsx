@@ -140,7 +140,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     const displayedCategories = showMoreCategories ? categories : categories.slice(0, 5);
 
-    const sidebarClasses = `fixed left-0 top-[64px] sm:top-[82px] w-64 lg:w-60 h-[calc(100vh-64px)] sm:h-[calc(100vh-82px)] bg-card overflow-y-auto transition-all duration-300 z-[100] lg:z-40 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'
+    const sidebarClasses = `fixed left-0 top-[64px] sm:top-[80px] w-64 lg:w-60 h-[calc(100vh-64px)] sm:h-[calc(100vh-80px)] bg-card overflow-y-auto transition-all duration-300 z-[100] lg:z-40 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`;
 
     return (

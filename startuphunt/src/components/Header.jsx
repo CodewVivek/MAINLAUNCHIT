@@ -86,7 +86,7 @@ export default function Header({ onMenuClick }) {
 
     // =====================================================
     return (
-        <header className="fixed top-0 inset-x-0 z-[100] h-[72px] backdrop-blur bg-white/70 dark:bg-black/40 border-b">
+        <header className="fixed top-0 inset-x-0 z-[100] h-[64px] sm:h-[80px] backdrop-blur bg-white/70 dark:bg-black/40 border-b">
 
             <div className="max-w-[1600px] mx-auto h-full px-4 flex items-center justify-between">
 
@@ -97,7 +97,13 @@ export default function Header({ onMenuClick }) {
                     </button>
 
                     <Link href="/" className="flex items-center gap-2">
-                        <img src="/images/r6_circle_optimized.png" className="w-8 h-8" />
+                        <img
+                            src="/images/r6_circle_optimized.png"
+                            className="w-8 h-8"
+                            width="32"
+                            height="32"
+                            alt="Logo"
+                        />
                         <span className="font-bold text-lg hidden sm:block">Launchit</span>
                     </Link>
                 </div>
@@ -174,6 +180,9 @@ export default function Header({ onMenuClick }) {
                                 <img
                                     src={avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`}
                                     className="w-9 h-9 rounded-full border"
+                                    width="36"
+                                    height="36"
+                                    alt="User avatar"
                                 />
                             ) : (
                                 <CircleUserRound />

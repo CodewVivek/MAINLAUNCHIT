@@ -100,10 +100,21 @@ export default async function ProjectPage(props) {
         if (!likesError) upvotesWithin2Days = count ?? null;
     }
 
+    // Fetch creator (maker) on server to prevent CLS
+    const { data: creator } = await supabase
+        .from('profiles')
+        .select('*, projects:projects(count)')
+        .eq('id', project.user_id)
+        .maybeSingle();
+
     // Pass server-fetched data to client component with Suspense boundary
     return (
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-            <ProjectDetailsClient initialProject={project} upvotesWithin2Days={upvotesWithin2Days} />
+            <ProjectDetailsClient
+                initialProject={project}
+                initialCreator={creator}
+                upvotesWithin2Days={upvotesWithin2Days}
+            />
         </Suspense>
     );
 }

@@ -148,6 +148,7 @@ const UserProfile = ({ initialProfile, initialProjects = [] }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
   const [deleteProject, setDeleteProject] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [deletePitchModal, setDeletePitchModal] = useState({ open: false, pitchId: null, status: null });
   const [editError, setEditError] = useState("");
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
@@ -651,6 +652,8 @@ const UserProfile = ({ initialProfile, initialProjects = [] }) => {
   const handleDeleteClick = (project) => setDeleteProject(project);
   const handleDeleteCancel = () => setDeleteProject(null);
   const handleDeleteConfirm = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
     try {
       // First, track the deletion in deleted_projects table
       const { error: trackError } = await supabase
@@ -662,7 +665,7 @@ const UserProfile = ({ initialProfile, initialProjects = [] }) => {
         }]);
 
       if (trackError) {
-        // Continue with deletion even if tracking fails
+        console.warn('Tracking deletion failed, but continuing with deletion:', trackError);
       }
 
       // Delete related data
@@ -687,10 +690,13 @@ const UserProfile = ({ initialProfile, initialProjects = [] }) => {
 
       setTimeout(() => fetchUserProjects(profile.id), 500);
     } catch (err) {
+      console.error('Deletion error:', err);
       setEditError(err.message || "Failed to delete project.");
-      toast.error("Failed to delete project", {
+      toast.error(`Failed to delete project: ${err.message || 'Unknown error'}`, {
         duration: 4000,
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1779,9 +1785,15 @@ const UserProfile = ({ initialProfile, initialProjects = [] }) => {
             </div>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDeleteCancel}>Cancel</Button>
-            <Button onClick={handleDeleteConfirm} color="error" variant="contained" startIcon={<Trash2 className="w-4 h-4" />}>
-              Delete Project
+            <Button onClick={handleDeleteCancel} disabled={isDeleting}>Cancel</Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              color="error"
+              variant="contained"
+              disabled={isDeleting}
+              startIcon={isDeleting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
+            >
+              {isDeleting ? "Deleting..." : "Delete Project"}
             </Button>
           </DialogActions>
         </Dialog>

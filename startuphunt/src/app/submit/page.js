@@ -31,6 +31,7 @@ export default function SubmitPage() {
     const [profile, setProfile] = useState(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [editingProjectId, setEditingProjectId] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -343,6 +344,8 @@ export default function SubmitPage() {
     };
 
     const handleSubmit = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         // Profile completion was checked when entering submit flow (Step 0 → 1)
         try {
             await handleFormSubmission({
@@ -368,8 +371,8 @@ export default function SubmitPage() {
                 // Pass state setters to allow cleanup after submission
                 setFormData: () => setFormData({
                     name: '', websiteUrl: '', tagline: '', description: '', category: '',
-                    logo: null, logoPreview: null, screenshots: [null, null, null, null], thumbnail: null,
-                    links: [''], tags: [], builtWith: [], features: []
+                    logo: null, logoPreview: null, screenshots: [null, null, null, null],
+                    thumbnail: null, links: [''], tags: [], builtWith: [], features: [],
                 }),
                 setSelectedCategory: () => { },
                 setLinks: (val) => handleFormChange('links', val),
@@ -571,11 +574,20 @@ export default function SubmitPage() {
                         <div className="flex items-center gap-4 w-full sm:w-auto order-1 sm:order-2">
                             <button
                                 onClick={handleNext}
-                                disabled={!isStepValid()}
+                                disabled={!isStepValid() || isSubmitting}
                                 className="w-full sm:w-auto px-10 h-11 rounded-xl bg-blue-600 text-white font-black text-sm tracking-tight hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                                {currentStep === 3 ? (selectedPlan === 'standard' ? 'Launch Project' : 'Promote & Launch') : 'Continue'}
-                                <ArrowRight className="w-4 h-4" />
+                                {currentStep === 3 ? (
+                                    isSubmitting ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Launching...
+                                        </>
+                                    ) : (
+                                        selectedPlan === 'standard' ? 'Launch Project' : 'Promote & Launch'
+                                    )
+                                ) : 'Continue'}
+                                {!isSubmitting && <ArrowRight className="w-4 h-4" />}
                             </button>
                         </div>
                     </div>

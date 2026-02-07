@@ -39,6 +39,7 @@ export const handleFormSubmission = async ({
     setIsRetrying,
     setIsGeneratingPreview,
     selectedPlan,
+    onFinally,
 }) => {
     // Safety checks for arrays
     const safeLinks = Array.isArray(links) ? links : [];
@@ -502,6 +503,10 @@ export const handleFormSubmission = async ({
 
         // Re-throw error so caller can handle state reset (e.g., isSubmitting)
         throw error;
+    } finally {
+        if (typeof onFinally === 'function') {
+            onFinally();
+        }
     }
 };
 

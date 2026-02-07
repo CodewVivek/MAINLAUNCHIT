@@ -92,11 +92,33 @@ function getLinkLabel(url) {
   return "Website";
 }
 
-const ProjectDetails = ({ initialProject, upvotesWithin2Days = null }) => {
+const ProjectDetailsClient = ({ initialProject, initialCreator = null, upvotesWithin2Days = null }) => {
+  const [project, setProject] = useState(initialProject);
+  const [creator, setCreator] = useState(initialCreator);
+  const [upvotes, setUpvotes] = useState(initialProject?.likes?.[0]?.count || 0);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isUpvoting, setIsUpvoting] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [relatedProjects, setRelatedProjects] = useState([]);
+  const [showRelaunchModal, setShowRelaunchModal] = useState(false);
+  const [relaunchError, setRelaunchError] = useState("");
+  const [isRelaunching, setIsRelaunching] = useState(false);
+  const [hasViewed, setHasViewed] = useState(false);
+
+  // New states for editing (if owner)
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ ...initialProject });
+  const [isSaving, setIsSaving] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState({});
+
   const router = useRouter();
 
-  const [project, setProject] = useState(initialProject);
-  const [creator, setCreator] = useState(null);
   const [user, setUser] = useState(null);
 
   const [loading, setLoading] = useState(false); // No loading since we have server data
@@ -164,9 +186,9 @@ const ProjectDetails = ({ initialProject, upvotesWithin2Days = null }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [project]);
 
-  // Fetch creator data
+  // Fetch creator data if not provided (Fallback)
   useEffect(() => {
-    if (!initialProject?.user_id) return;
+    if (creator || !initialProject?.user_id) return;
 
     const fetchCreator = async () => {
       const { data: userData, error: userError } = await supabase
@@ -179,7 +201,7 @@ const ProjectDetails = ({ initialProject, upvotesWithin2Days = null }) => {
     };
 
     fetchCreator();
-  }, [initialProject]);
+  }, [initialProject, creator]);
 
   // Check logged-in user + ensure profile exists
   useEffect(() => {

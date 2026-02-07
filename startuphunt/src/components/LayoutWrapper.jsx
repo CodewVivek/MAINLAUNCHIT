@@ -10,29 +10,12 @@ export default function LayoutWrapper({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
 
-    // Auto-open sidebar only on first visit (desktop); after that user opens it via menu if they want
+    // Mobile/Desktop sidebar state handled by toggle; avoid auto-opening on mount to prevent CLS
     useEffect(() => {
-        const isSubmitPage = pathname?.startsWith('/submit');
+        // We only close it automatically on route change for mobile
         const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-
-        if (pathname?.startsWith('/submit')) {
-            setIsSidebarOpen(false);
-            return;
-        }
-
         if (!isDesktop) {
             setIsSidebarOpen(false);
-            return;
-        }
-
-        try {
-            const alreadyOpenedOnce = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('launchit_sidebar_opened_once');
-            if (!alreadyOpenedOnce) {
-                setIsSidebarOpen(true);
-                sessionStorage.setItem('launchit_sidebar_opened_once', '1');
-            }
-        } catch {
-            setIsSidebarOpen(true);
         }
     }, [pathname]);
 
@@ -67,7 +50,7 @@ export default function LayoutWrapper({ children }) {
                 <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
                 <main
-                    className={`flex-grow transition-all duration-300 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-82px)] overflow-x-hidden pt-[64px] sm:pt-[82px] ${isSidebarOpen ? "lg:ml-60" : "lg:ml-0"
+                    className={`flex-grow transition-all duration-300 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)] overflow-x-hidden pt-[64px] sm:pt-[80px] ${isSidebarOpen ? "lg:ml-60" : "lg:ml-0"
                         }`}
                 >
                     {children}

@@ -16,17 +16,37 @@ import PremiumSponsorCard from "@/components/PremiumSponsorCard";
 import Image from "next/image";
 import { getCategoryDisplay } from "@/constants/categoryIcons";
 
-const Dashboard = ({ initialProjects = [], initialError = null }) => {
+const Dashboard = ({ initialProjects = [], initialPremium = [], initialHighlight = [], initialCategoryCounts = [], initialError = null }) => {
   const [projects, setProjects] = useState(initialProjects);
-  const [premiumProjects, setPremiumProjects] = useState([]);
+  const [premiumProjects, setPremiumProjects] = useState(initialPremium);
   const [highlightProjects, setHighlightProjects] = useState([]);
-  const [categoryCounts, setCategoryCounts] = useState([]); // top 8 by launch count for Explore by Category
+  const [categoryCounts, setCategoryCounts] = useState(initialCategoryCounts); // top 8 by launch count for Explore by Category
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(initialError);
   const router = useRouter();
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const ITEMS_PER_PAGE = 20;
+
+  // Handle Highlight Rotation (Client-side logic to ensure it changes daily)
+  useEffect(() => {
+    if (initialHighlight.length === 0) return;
+
+    const allHighlights = [...initialHighlight].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    if (allHighlights.length <= 9) {
+      setHighlightProjects(allHighlights);
+    } else {
+      const limit = 9;
+      const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+      const startIndex = (daysSinceEpoch * limit) % allHighlights.length;
+      const rotated = [];
+      for (let i = 0; i < limit; i++) {
+        rotated.push(allHighlights[(startIndex + i) % allHighlights.length]);
+      }
+      setHighlightProjects(rotated);
+    }
+  }, [initialHighlight]);
 
   useEffect(() => {
     if (initialProjects.length >= ITEMS_PER_PAGE) setHasMore(true);
@@ -61,82 +81,6 @@ const Dashboard = ({ initialProjects = [], initialError = null }) => {
 
     setLoadingMore(false);
   };
-
-  useEffect(() => {
-    const fetchSponsoredProjects = async () => {
-      const { data } = await supabase
-        .from("projects")
-        .select("id, name, tagline, slug, logo_url, thumbnail_url, website_url, sponsored_tier, created_at")
-        .eq("is_sponsored", true)
-        .neq("status", "draft")
-        .order("created_at", { ascending: false });
-
-      if (!data) return;
-
-      setPremiumProjects(
-        data.filter(p => (p.sponsored_tier || "").toLowerCase() === "premium")
-      );
-
-      // Showcase Rotation Logic
-      const allHighlights = data
-        .filter(p => (p.sponsored_tier || "").toLowerCase() === "highlight")
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-      if (allHighlights.length <= 9) {
-        setHighlightProjects(allHighlights);
-      } else {
-        const limit = 9;
-        const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-        const startIndex = (daysSinceEpoch * limit) % allHighlights.length;
-        const rotated = [];
-        for (let i = 0; i < limit; i++) {
-          rotated.push(allHighlights[(startIndex + i) % allHighlights.length]);
-        }
-        setHighlightProjects(rotated);
-      }
-    };
-
-    fetchSponsoredProjects();
-  }, []);
-
-  useEffect(() => {
-    const fetchCategoryCounts = async () => {
-      const { data } = await supabase
-        .from("projects")
-        .select("category_type, logo_url, thumbnail_url, slug, name")
-        .neq("status", "draft")
-        .not("category_type", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(5000);
-
-      if (!data?.length) return;
-
-      const byCategory = {};
-      data.forEach((p) => {
-        const c = p.category_type?.trim() || "";
-        if (!c) return;
-        if (!byCategory[c]) byCategory[c] = [];
-        byCategory[c].push(p);
-      });
-
-      const sorted = Object.entries(byCategory)
-        .map(([category_type, list]) => ({
-          category_type,
-          count: list.length,
-          samples: list.slice(0, 2).map(({ logo_url, thumbnail_url, slug, name }) => ({
-            logo_url: logo_url || thumbnail_url,
-            slug,
-            name,
-          })),
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 8);
-
-      setCategoryCounts(sorted);
-    };
-
-    fetchCategoryCounts();
-  }, []);
 
   const grouped = {};
   [...projects]

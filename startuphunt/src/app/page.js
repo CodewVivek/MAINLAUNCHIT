@@ -34,11 +34,11 @@ export const metadata = {
 
 // Server Component - Fetches data for SEO
 export default async function HomePage() {
-  // Fetch initial projects on the server (fast, SEO-friendly)
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const sevenDaysAgoISO = sevenDaysAgo.toISOString();
 
+  // 1. Fetch main feed
   const { data: initialProjects, error } = await supabase
     .from("projects")
     .select(`
@@ -52,10 +52,59 @@ export default async function HomePage() {
     .order("plan_type", { ascending: false })
     .order("created_at", { ascending: false });
 
+  // 2. Fetch Sponsored (Premium/Highlight)
+  const { data: sponsoredData } = await supabase
+    .from("projects")
+    .select("id, name, tagline, slug, logo_url, thumbnail_url, website_url, sponsored_tier, created_at, plan_type")
+    .eq("is_sponsored", true)
+    .neq("status", "draft")
+    .order("created_at", { ascending: false });
+
+  const premiumProjects = (sponsoredData || []).filter(
+    p => (p.sponsored_tier || "").toLowerCase() === "premium"
+  );
+
+  const highlightProjects = (sponsoredData || []).filter(
+    p => (p.sponsored_tier || "").toLowerCase() === "highlight"
+  );
+
+  // 3. Fetch categories for "Explore" section
+  const { data: catData } = await supabase
+    .from("projects")
+    .select("category_type, logo_url, thumbnail_url, slug, name")
+    .neq("status", "draft")
+    .not("category_type", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(1000); // Reduced limit for server performance
+
+  const byCategory = {};
+  (catData || []).forEach((p) => {
+    const c = p.category_type?.trim() || "";
+    if (!c) return;
+    if (!byCategory[c]) byCategory[c] = [];
+    byCategory[c].push(p);
+  });
+
+  const categoryCounts = Object.entries(byCategory)
+    .map(([category_type, list]) => ({
+      category_type,
+      count: list.length,
+      samples: list.slice(0, 2).map(({ logo_url, thumbnail_url, slug, name }) => ({
+        logo_url: logo_url || thumbnail_url,
+        slug,
+        name,
+      })),
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+
   // Pass server-fetched data to client component
   return (
     <DashBoardClient
       initialProjects={initialProjects || []}
+      initialPremium={premiumProjects}
+      initialHighlight={highlightProjects}
+      initialCategoryCounts={categoryCounts}
       initialError={error?.message || null}
     />
   );
