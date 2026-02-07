@@ -446,15 +446,11 @@ export const handleFormSubmission = async ({
                 navigate(`/launches/${finalSubmissionData.slug}?new_launch=true`);
             }, 1000);
         } else {
-            // Paid Plan - Redirect to pricing to complete payment
+            // Paid Plan - Redirect to pricing to complete payment (immediate so correct plan is used)
             const planToSelect = selectedPlan === 'showcase' ? 'Showcase' : 'Spotlight';
             setSnackbar({ open: true, message: 'Redirecting to checkout...', severity: 'success' });
             trackSubmission('checkout_redirect');
-
-            setTimeout(() => {
-                // Redirecting to pricing tells it which project AND which plan to pre-select
-                navigate(`/pricing?projectId=${finalSubmissionData.id}&plan=${planToSelect}`);
-            }, 1000);
+            navigate(`/pricing?projectId=${finalSubmissionData.id}&plan=${planToSelect}`);
         }
 
         // Complete form reset

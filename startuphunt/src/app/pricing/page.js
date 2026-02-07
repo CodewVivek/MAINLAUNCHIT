@@ -55,10 +55,9 @@ export default function PricingPage() {
             setSelectedPlan(planParam);
         }
 
-        // If we have a projectId and plan in the URL, the user was just redirected 
-        // from the submission flow. We can proceed directly to checkout.
+        // From submit flow: projectId + plan in URL → start checkout with that plan (pass planParam so we don't use stale selectedPlan)
         if (urlProjectId && planParam) {
-            processCheckout(urlProjectId);
+            processCheckout(urlProjectId, planParam);
         }
     }, [searchParams, urlProjectId]);
 
@@ -109,7 +108,9 @@ export default function PricingPage() {
         }
     };
 
-    const processCheckout = async (projectIdToUse) => {
+    // planOverride: when coming from submit redirect (?plan=Spotlight), use this so we don't rely on stale selectedPlan state
+    const processCheckout = async (projectIdToUse, planOverride = null) => {
+        const planToUse = planOverride || selectedPlan;
         setLoadingCheckout(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -120,11 +121,10 @@ export default function PricingPage() {
             }
 
             // Dodo adapter expects checkout-session shaped payload.
-            // Product IDs must be exposed to the client (NEXT_PUBLIC_) or fetched from your backend.
             const productId =
-                selectedPlan === 'Showcase'
+                planToUse === 'Showcase'
                     ? process.env.NEXT_PUBLIC_DODO_PRODUCT_ID_SHOWCASE
-                    : selectedPlan === 'Spotlight'
+                    : planToUse === 'Spotlight'
                         ? process.env.NEXT_PUBLIC_DODO_PRODUCT_ID_SPOTLIGHT
                         : null;
 
@@ -136,14 +136,14 @@ export default function PricingPage() {
             const response = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include', // IMPORTANT: Send cookies for authentication
+                credentials: 'include',
                 body: JSON.stringify({
                     product_cart: [{ product_id: productId, quantity: 1 }],
                     customer: { email: user.email },
                     return_url: `${window.location.origin}/dashboard`,
                     metadata: {
                         userId: String(user.id),
-                        planType: String(selectedPlan),
+                        planType: String(planToUse),
                         projectId: String(projectIdToUse),
                     },
                 }),
@@ -180,9 +180,9 @@ export default function PricingPage() {
 
         setSelectedPlan(planName);
 
-        // 1. If we already have a projectId from URL, use it directly
+        // 1. If we already have a projectId from URL, use it directly (pass planName so checkout uses correct plan)
         if (urlProjectId) {
-            await processCheckout(urlProjectId);
+            await processCheckout(urlProjectId, planName);
             return;
         }
 

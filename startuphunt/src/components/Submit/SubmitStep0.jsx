@@ -65,7 +65,7 @@ const FadeItem = ({ project }) => {
 };
 
 export default function SubmitStep0({ onContinue, userDrafts = [], profileComplete = true, onShowProfileModal }) {
-    const [url, setUrl] = useState('');
+    const [url, setUrl] = useState('https://');
     const [isGenerating, setIsGenerating] = useState(false);
     const [loadingStep, setLoadingStep] = useState(0);
     const [sponsoredProjects, setSponsoredProjects] = useState([]);
@@ -352,7 +352,7 @@ export default function SubmitStep0({ onContinue, userDrafts = [], profileComple
                                 type="url"
                                 value={url}
                                 onChange={(e) => profileComplete && setUrl(e.target.value)}
-                                placeholder={profileComplete ? "https://yourproduct.com" : "Complete your profile to continue"}
+                                placeholder={profileComplete ? "yourproduct.com" : "Complete your profile to continue"}
                                 readOnly={!profileComplete}
                                 className="relative w-full px-4 py-4 bg-background border border-border rounded-xl text-lg placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                 onFocus={() => { if (!profileComplete && onShowProfileModal) onShowProfileModal(); }}
