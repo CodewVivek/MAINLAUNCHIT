@@ -152,6 +152,7 @@ function createDodoWebhookHandler() {
         .from('projects')
         .update({
           ...update,
+          status: 'launched', // Change from pending_payment to launched after payment
           subscription_id: subscriptionId ?? null,
           subscription_status: status,
           current_period_end: currentPeriodEnd ?? null,

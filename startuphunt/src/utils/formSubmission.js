@@ -362,7 +362,12 @@ export const handleFormSubmission = async ({
         } else {
             // New project launch
             submissionData.created_at = new Date().toISOString();
-            submissionData.status = 'launched';
+            // Only free plan launches immediately; paid plans wait for payment webhook
+            if (selectedPlan === 'standard') {
+                submissionData.status = 'launched';
+            } else {
+                submissionData.status = 'pending_payment';
+            }
             let retries = 0;
             const maxRetries = 3;
             let finalError = null;

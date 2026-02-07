@@ -569,23 +569,43 @@ const UserProfile = ({ initialProfile, initialProjects = [] }) => {
 
       // Handle Logo Upload if it's a File object
       if (editForm.logo_file) {
+        console.log('Uploading logo:', editForm.logo_file.name);
         updateData.logo_url = await handleFileUpload(editForm.logo_file, 'logos');
+        console.log('Logo uploaded:', updateData.logo_url);
       }
 
       // Handle Thumbnail Upload if it's a File object
       if (editForm.thumbnail_file) {
+        console.log('Uploading thumbnail:', editForm.thumbnail_file.name);
         updateData.thumbnail_url = await handleFileUpload(editForm.thumbnail_file, 'thumbnails');
+        console.log('Thumbnail uploaded:', updateData.thumbnail_url);
       }
 
       // Handle Screenshots Uploads
+      console.log('New screenshots to upload:', editForm.new_screenshots?.length || 0);
+      console.log('Existing cover URLs:', editForm.cover_urls?.length || 0);
+
       if (editForm.new_screenshots?.length > 0) {
-        const newUrls = await Promise.all(
-          editForm.new_screenshots.map(file => handleFileUpload(file, 'covers'))
-        );
-        updateData.cover_urls = [...(editForm.cover_urls || []), ...newUrls];
+        try {
+          const newUrls = await Promise.all(
+            editForm.new_screenshots.map(async (file) => {
+              console.log('Uploading screenshot:', file.name);
+              const url = await handleFileUpload(file, 'covers');
+              console.log('Screenshot uploaded:', file.name, '→', url);
+              return url;
+            })
+          );
+          updateData.cover_urls = [...(editForm.cover_urls || []), ...newUrls];
+          console.log('Final cover_urls array:', updateData.cover_urls);
+        } catch (uploadError) {
+          console.error('Screenshot upload failed:', uploadError);
+          throw new Error(`Failed to upload screenshots: ${uploadError.message}`);
+        }
       } else {
         updateData.cover_urls = editForm.cover_urls;
       }
+
+      console.log('Updating project with data:', updateData);
 
       const { error } = await supabase
         .from("projects")
@@ -598,7 +618,8 @@ const UserProfile = ({ initialProfile, initialProjects = [] }) => {
       setSnackbar({ open: true, message: "Project updated successfully!", severity: "success" });
       setTimeout(() => fetchUserProjects(profile.id), 500);
     } catch (err) {
-      setEditError("Something went wrong. Please try again.");
+      console.error('Save error:', err);
+      setEditError(`Something went wrong: ${err.message || 'Please try again.'}`);
     } finally {
       setIsSaving(false);
     }
